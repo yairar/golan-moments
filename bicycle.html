@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>על שני גלגלים בגולן — רגעים של הגולן</title>
+<meta name="description" content="מסלולי אופניים בגולן — נוף, אבק, פריחה ובזלת. המסלול המדויק? זה כבר שיחה עם המארחים שמכירים כל גבעה.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Assistant:wght@300;400;600;700&family=Heebo:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+
+<!--
+  ============================================================
+  bicycle.html — prototype
+  ============================================================
+  MEDIA STATUS
+  ------------------------------------------------------------
+  DONE — all stills come from ./img/trails/ (1.jpg … 15.jpg).
+    · page hero ......... img/trails/4.jpg
+    · trail cards ...... TRAILS[n].card
+    · trail story hero . TRAILS[n].hero
+    · trail photo strip  TRAILS[n].photos  (4 each, 4–6 supported)
+    · gallery .......... GALLERY  (all 15)
+    · final invite ..... img/trails/12.jpg
+
+  VIDEO — wired. A trail plays its clip as soon as TRAILS[n].clip has
+  a `src`; give it only a `poster` and it falls back to a badged still
+  slot. Clips are muted-looping with a sound toggle. The hero loop is
+  <video class="bike-hero__vid"> in the markup above.
+
+  STILL TODO — one portrait:
+    · Owner portrait ... search TODO-OWNER-PHOTO
+      still generated art; replace with <img src="img/owner.jpg">.
+    Owner name + quote are placeholder copy — search TODO-OWNER.
+
+  Slots marked with a dashed on-screen badge (.ph-badge) are the
+  ones still awaiting real media. Delete .proto-flag and the
+  .ph-badge rules once video is in.
+  ============================================================
+-->
+
+<style>
+/* ============================================================
+   bicycle.html — page-specific layer.
+   Inherits all tokens from css/style.css (paper / ink / wine /
+   olive / gold). Adds one token: --dust, for the trail pages.
+   ============================================================ */
+:root{
+  --dust:      #C29B63;
+  --dust-deep: #8A6A3B;
+  --basalt:    #3A3A34;
+}
+
+/* ============================================================
+   1 — HERO. One moment, not a slideshow.
+   ============================================================ */
+.bike-hero{
+  position: relative;
+  height: 100svh;
+  min-height: 580px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  background: var(--basalt);
+}
+.bike-hero__media{
+  position: absolute; inset: 0;
+  overflow: hidden;
+}
+.bike-hero__media > img,
+.bike-hero__media > video{
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.bike-hero::after{
+  content:"";
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(20,18,14,.34) 0%, rgba(20,18,14,.05) 40%, rgba(20,18,14,.72) 100%);
+  z-index: 1;
+}
+.bike-hero__content{
+  position: relative; z-index: 2;
+  width: 100%;
+  color: var(--paper);
+  padding: 0 var(--page-pad) clamp(56px, 9vh, 110px);
+}
+.bike-hero__title{
+  font-size: clamp(38px, 7.4vw, 82px);
+  line-height: 1.04;
+  color: var(--paper);
+  max-width: 18ch;
+  text-shadow: 0 2px 34px rgba(0,0,0,.35);
+}
+.bike-hero__sub{
+  margin-top: 20px;
+  font-family: var(--display);
+  font-style: italic;
+  font-size: clamp(16px, 2.2vw, 23px);
+  color: var(--paper);
+  opacity: .92;
+  max-width: 32ch;
+}
+
+/* ============================================================
+   2 — TRAIL CARDS. Mood + area + season. Not a database.
+   ============================================================ */
+.trails{
+  padding: clamp(80px, 12vh, 140px) 0 clamp(50px, 8vh, 90px);
+}
+.trails__grid{
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--page-pad);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: clamp(16px, 2.2vw, 30px);
+}
+.tcard{
+  position: relative;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: var(--paper-dim);
+  border-radius: 2px;
+  overflow: hidden;
+  text-align: right;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: transform .6s cubic-bezier(.2,.7,.2,1), box-shadow .6s ease;
+}
+.tcard:hover, .tcard:focus-visible{
+  transform: translateY(-6px);
+  box-shadow: 0 18px 44px -22px rgba(33,30,25,.5);
+  outline: none;
+}
+.tcard:focus-visible{ box-shadow: 0 0 0 2px var(--wine), 0 18px 44px -22px rgba(33,30,25,.5); }
+.tcard__media{
+  display: block;
+  position: relative;
+  aspect-ratio: 4/5;
+  overflow: hidden;
+  background: var(--paper-deep);
+}
+.tcard__media > svg, .tcard__media > img{
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 1.2s cubic-bezier(.2,.7,.2,1);
+}
+.tcard:hover .tcard__media > svg, .tcard:hover .tcard__media > img{ transform: scale(1.06); }
+.tcard__media::after{
+  content:"";
+  position:absolute; inset:0;
+  background: linear-gradient(0deg, rgba(15,13,10,.72) 0%, rgba(15,13,10,.05) 55%);
+}
+.tcard__meta{
+  display: block;
+  position: absolute;
+  z-index: 3;
+  right: 18px; left: 18px; bottom: 16px;
+  color: var(--paper);
+}
+.tcard__mood, .tcard__tags{ display: block; }
+.tcard__tags{ display: flex; }
+.tcard__mood{
+  font-family: var(--display);
+  font-size: clamp(21px, 2.3vw, 27px);
+  font-weight: 500;
+  line-height: 1.25;
+}
+.tcard__tags{
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  font-family: var(--caption);
+  font-size: 11.5px;
+  letter-spacing: .1em;
+}
+.tcard__tag{
+  border: 1px solid rgba(251,249,244,.42);
+  border-radius: 999px;
+  padding: 3px 11px;
+  backdrop-filter: blur(3px);
+  background: rgba(20,18,14,.22);
+}
+.tcard__tag--season{ border-color: rgba(176,143,79,.85); color: #E8CF9C; }
+.tcard__foot{
+  padding: 16px 18px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--caption);
+  font-size: 12.5px;
+  letter-spacing: .1em;
+  color: var(--wine-soft);
+}
+.tcard__foot .count{ color: var(--ink-faint); letter-spacing: .06em; }
+.tcard__arrow{ transition: transform .4s ease; }
+.tcard:hover .tcard__arrow{ transform: translateX(-5px); }
+
+/* ============================================================
+   4 — OWNER. A face, not a form.
+   ============================================================ */
+.owner{
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: var(--spread-gap);
+  align-items: center;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(80px, 12vh, 140px) var(--page-pad);
+}
+.owner__portrait{
+  position: relative;
+  border-radius: 2px;
+  overflow: hidden;
+  background: var(--paper-deep);
+  aspect-ratio: 4/5;
+}
+.owner__portrait > svg, .owner__portrait > img{ width:100%; height:100%; object-fit: cover; }
+.owner__quote{
+  font-family: var(--display);
+  font-style: italic;
+  font-size: clamp(22px, 3.1vw, 36px);
+  line-height: 1.45;
+  color: var(--ink);
+  max-width: 26ch;
+}
+.owner__name{
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  font-family: var(--caption);
+  font-size: 13px;
+  letter-spacing: .14em;
+  color: var(--ink-faint);
+}
+.owner__name strong{ color: var(--ink); font-weight: 600; letter-spacing: .06em; }
+.owner__body{ margin-top: 20px; color: var(--ink-soft); max-width: 44ch; }
+.owner__cta{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 30px;
+  background: var(--wine);
+  color: var(--white);
+  padding: 14px 26px;
+  border-radius: 999px;
+  font-family: var(--caption);
+  font-size: 14px;
+  letter-spacing: .06em;
+  transition: background .3s ease, transform .3s ease;
+}
+.owner__cta:hover{ background: var(--wine-soft); transform: translateY(-2px); }
+@media (max-width: 900px){
+  .owner{ grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   5 — GALLERY + LIGHTBOX
+   ============================================================ */
+.gal{
+  padding: clamp(50px, 8vh, 90px) 0 clamp(70px, 11vh, 130px);
+  background: var(--paper-dim);
+}
+.gal__grid{
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--page-pad);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: clamp(8px, 1.2vw, 16px);
+}
+.gtile{
+  position: relative;
+  padding: 0; border: 0; margin: 0;
+  background: var(--paper-deep);
+  border-radius: 2px;
+  overflow: hidden;
+  cursor: pointer;
+  aspect-ratio: 1/1;
+}
+/* uniform square tiles read as a clean contact sheet */
+.gtile > svg, .gtile > img{ width:100%; height:100%; object-fit: cover; transition: transform 1s cubic-bezier(.2,.7,.2,1), filter .5s; }
+.gtile:hover > svg, .gtile:hover > img{ transform: scale(1.07); }
+.gtile:focus-visible{ outline: 2px solid var(--wine); outline-offset: 2px; }
+
+/* lightbox */
+.lb{
+  position: fixed; inset: 0; z-index: 400;
+  background: rgba(14,13,11,.94);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(16px, 5vw, 60px);
+}
+.lb.is-open{ display: flex; }
+.lb__stage{
+  position: relative;
+  max-width: min(1100px, 100%);
+  width: 100%;
+}
+.lb__media{
+  width: 100%;
+  max-height: 78svh;
+  aspect-ratio: 3/2;
+  border-radius: 2px;
+  overflow: hidden;
+  background: #191814;
+}
+.lb__media > svg, .lb__media > img{ width:100%; height:100%; object-fit: contain; }
+.lb__cap{
+  margin-top: 14px;
+  font-family: var(--caption);
+  font-size: 13px;
+  letter-spacing: .1em;
+  color: var(--paper-deep);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.lb__nav{
+  position: absolute;
+  top: 50%; transform: translateY(-50%);
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  border: 1px solid rgba(251,249,244,.3);
+  background: rgba(20,18,14,.5);
+  color: var(--paper);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: grid; place-items: center;
+  transition: background .3s, border-color .3s;
+}
+.lb__nav:hover{ background: var(--wine); border-color: var(--wine); }
+.lb__nav--prev{ right: -8px; }
+.lb__nav--next{ left: -8px; }
+@media (max-width: 700px){
+  .lb__nav--prev{ right: 4px; } .lb__nav--next{ left: 4px; }
+}
+
+/* shared close button (lightbox + story) */
+.x-close{
+  position: fixed;
+  top: 16px; left: 16px;
+  z-index: 10;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(251,249,244,.32);
+  background: rgba(20,18,14,.55);
+  color: var(--paper);
+  font-size: 19px;
+  cursor: pointer;
+  display: grid; place-items: center;
+  transition: background .3s, transform .3s;
+}
+.x-close:hover{ background: var(--wine); transform: rotate(90deg); }
+
+/* ============================================================
+   6 — TRAIL STORY OVERLAY
+   ============================================================ */
+.story{
+  position: fixed; inset: 0; z-index: 380;
+  background: var(--paper);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: none;
+}
+.story.is-open{ display: block; animation: storyIn .5s cubic-bezier(.2,.7,.2,1); }
+@keyframes storyIn{ from{ opacity:0; transform: translateY(18px); } to{ opacity:1; transform:none; } }
+
+.story__hero{
+  position: relative;
+  height: min(62svh, 620px);
+  overflow: hidden;
+  background: var(--basalt);
+  display: flex;
+  align-items: flex-end;
+}
+.story__hero > .scene-wrap{ position:absolute; inset:0; }
+.story__hero::after{
+  content:""; position:absolute; inset:0;
+  background: linear-gradient(180deg, rgba(20,18,14,.3), rgba(20,18,14,.08) 45%, rgba(20,18,14,.8));
+}
+.story__head{
+  position: relative; z-index: 2;
+  color: var(--paper);
+  padding: 0 var(--page-pad) clamp(30px, 5vh, 56px);
+  width: 100%;
+}
+.story__head h2{
+  color: var(--paper);
+  font-size: clamp(30px, 5.2vw, 58px);
+  max-width: 20ch;
+}
+.story__head .tcard__tags{ margin-top: 16px; }
+
+.story__body{
+  max-width: 780px;
+  margin: 0 auto;
+  padding: clamp(40px, 7vh, 74px) var(--page-pad) 0;
+}
+.story__texture p{
+  font-size: clamp(18px, 2.2vw, 21px);
+  line-height: 1.8;
+  color: var(--ink-soft);
+  margin: 0 0 22px;
+}
+.story__texture p:first-child::first-letter{
+  font-family: var(--display);
+  font-size: 58px;
+  float: right;
+  line-height: .82;
+  padding-left: 10px;
+  margin-top: 6px;
+  color: var(--wine);
+}
+
+.story__clip{
+  max-width: 1080px;
+  margin: clamp(30px, 6vh, 60px) auto 0;
+  padding: 0 var(--page-pad);
+}
+.story__clip .clipframe{
+  position: relative;
+  aspect-ratio: 16/9;
+  border-radius: 2px;
+  overflow: hidden;
+  background: var(--basalt);
+}
+.story__clip .clipframe > img,
+.story__clip .clipframe > video{ width:100%; height:100%; object-fit: cover; }
+.clip-tag{
+  position: absolute; z-index: 3;
+  right: 14px; top: 14px;
+  font-family: var(--caption);
+  font-size: 10.5px;
+  letter-spacing: .16em;
+  color: var(--paper);
+  background: rgba(20,18,14,.6);
+  border: 1px solid rgba(251,249,244,.28);
+  border-radius: 999px;
+  padding: 5px 12px;
+  backdrop-filter: blur(3px);
+}
+.story__clip figcaption{ margin-top: 12px; }
+
+.story__strip{
+  margin: clamp(34px, 6vh, 64px) 0 0;
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 4px var(--page-pad) 26px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold) transparent;
+}
+.story__strip::-webkit-scrollbar{ height: 6px; }
+.story__strip::-webkit-scrollbar-thumb{ background: var(--gold); border-radius: 3px; }
+.sframe{
+  position: relative;
+  flex: 0 0 auto;
+  width: clamp(230px, 30vw, 340px);
+  aspect-ratio: 3/4;
+  border-radius: 2px;
+  overflow: hidden;
+  background: var(--paper-deep);
+  scroll-snap-align: start;
+  cursor: pointer;
+  border: 0; padding: 0; margin: 0;
+}
+.sframe > svg, .sframe > img{ width:100%; height:100%; object-fit: cover; transition: transform 1s cubic-bezier(.2,.7,.2,1); }
+.sframe:hover > svg, .sframe:hover > img{ transform: scale(1.05); }
+
+.story__locked{
+  max-width: 780px;
+  margin: clamp(20px, 4vh, 40px) auto 0;
+  padding: 0 var(--page-pad);
+}
+.locked{
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--paper-dim);
+  padding: clamp(24px, 4vw, 38px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px 26px;
+  justify-content: space-between;
+}
+.locked__txt{ max-width: 40ch; }
+.locked h3{
+  font-size: clamp(19px, 2.4vw, 25px);
+  margin-bottom: 8px;
+}
+.locked p{ color: var(--ink-soft); font-size: 15.5px; margin: 0; }
+.locked__cta{
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: var(--olive);
+  color: var(--white);
+  padding: 13px 24px;
+  border-radius: 999px;
+  font-family: var(--caption);
+  font-size: 13.5px;
+  letter-spacing: .06em;
+  white-space: nowrap;
+  transition: background .3s, transform .3s;
+}
+.locked__cta:hover{ background: var(--olive-soft); transform: translateY(-2px); }
+.story__end{ height: clamp(50px, 9vh, 100px); }
+
+/* ============================================================
+   7 — FIXED WHATSAPP
+   ============================================================ */
+.wa{
+  position: fixed;
+  z-index: 320;
+  inset: auto 18px 18px auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #1EA855;
+  color: #fff;
+  padding: 13px 20px 13px 17px;
+  border-radius: 999px;
+  font-family: var(--caption);
+  font-size: 14.5px;
+  letter-spacing: .02em;
+  box-shadow: 0 12px 30px -10px rgba(12,60,32,.65);
+  transition: transform .35s cubic-bezier(.2,.7,.2,1), background .3s;
+}
+.wa:hover{ transform: translateY(-3px) scale(1.03); background: #17914A; }
+.wa svg{ width: 21px; height: 21px; flex: 0 0 auto; }
+.wa__txt{ display: inline; }
+@media (max-width: 560px){
+  .wa{ padding: 14px; }
+  .wa__txt{ display: none; }
+}
+.wa::after{
+  content:"";
+  position:absolute; inset:0;
+  border-radius: inherit;
+  border: 1px solid rgba(255,255,255,.55);
+  animation: waPulse 2.6s ease-out infinite;
+}
+@keyframes waPulse{
+  0%{ transform: scale(1); opacity: .7; }
+  70%{ transform: scale(1.28); opacity: 0; }
+  100%{ opacity: 0; }
+}
+
+/* ============================================================
+   8 — PLACEHOLDER "VIDEO" SCENE ANIMATION
+   Parallax ridge drift + dust + rider bob. Delete along with
+   the placeholders once real footage is in.
+   ============================================================ */
+.scene-wrap{ position: relative; overflow: hidden; background: var(--basalt); }
+.scene-wrap svg{ width:100%; height:100%; display:block; }
+.scene-wrap[data-live] .lyr-1{ animation: drift 26s linear infinite; }
+.scene-wrap[data-live] .lyr-2{ animation: drift 17s linear infinite; }
+.scene-wrap[data-live] .lyr-3{ animation: drift 10s linear infinite; }
+@keyframes drift{ from{ transform: translateX(0); } to{ transform: translateX(-160px); } }
+.scene-wrap[data-live] .rider{ animation: bob 1.05s ease-in-out infinite; }
+@keyframes bob{ 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-3.5px) } }
+.scene-wrap[data-live] .dust{ animation: puff 2.4s ease-out infinite; }
+.scene-wrap[data-live] .dust:nth-of-type(2){ animation-delay: .5s; }
+.scene-wrap[data-live] .dust:nth-of-type(3){ animation-delay: 1.1s; }
+.scene-wrap[data-live] .dust:nth-of-type(4){ animation-delay: 1.7s; }
+@keyframes puff{
+  0%{ opacity:.55; transform: translate(0,0) scale(.5); }
+  100%{ opacity:0; transform: translate(46px,-16px) scale(2.4); }
+}
+.scene-wrap[data-live] .sun{ animation: sunPulse 9s ease-in-out infinite alternate; }
+@keyframes sunPulse{ from{ opacity:.75 } to{ opacity:1 } }
+.grain{
+  position:absolute; inset:-40%;
+  pointer-events:none;
+  opacity:.16;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.scene-wrap[data-live] .grain{ animation: grainShift .9s steps(3) infinite; }
+@keyframes grainShift{
+  0%{ transform: translate(0,0) } 33%{ transform: translate(-6%,4%) } 66%{ transform: translate(5%,-5%) }
+}
+.ph-badge{
+  position:absolute; z-index:4;
+  right: 12px; bottom: 12px;
+  font-family: var(--caption);
+  font-size: 10px;
+  letter-spacing: .14em;
+  color: rgba(251,249,244,.8);
+  background: rgba(20,18,14,.45);
+  border: 1px dashed rgba(251,249,244,.35);
+  border-radius: 2px;
+  padding: 4px 9px;
+}
+.bike-hero__img,
+.bike-hero__vid{
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  animation: hero-settle 2.6s ease-out forwards;   /* keyframes live in css/style.css */
+}
+.story__heroimg{
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.clipposter,
+.clipframe video{
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+
+/* clip controls: sound toggle, plus a play fallback for when the
+   browser refuses to autoplay (iOS Low Power Mode, data saver) */
+.clipsound, .clipplay{
+  position: absolute; z-index: 4;
+  font-family: var(--caption);
+  font-size: 12px;
+  letter-spacing: .08em;
+  color: var(--paper);
+  background: rgba(20,18,14,.55);
+  border: 1px solid rgba(251,249,244,.35);
+  border-radius: 999px;
+  padding: 7px 14px;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background .3s ease, border-color .3s ease, transform .3s ease;
+}
+.clipsound:hover, .clipplay:hover{ background: var(--wine); border-color: var(--wine); }
+.clipsound{ right: 14px; bottom: 14px; }
+.clipplay{
+  right: 50%; top: 50%;
+  transform: translate(50%, -50%);
+  width: 66px; height: 66px;
+  border-radius: 50%;
+  padding: 0;
+  display: grid; place-items: center;
+  font-size: 19px;
+}
+.clipplay:hover{ transform: translate(50%, -50%) scale(1.06); }
+.clipplay[hidden]{ display: none; }
+/* hero badge moves clear of the fixed WhatsApp button */
+.ph-badge--hero{ right: auto; left: 12px; bottom: auto; top: 76px; }
+
+body.is-locked{ overflow: hidden; }
+
+/* the 4th nav link wraps on small phones */
+@media (max-width: 620px){
+  .site-nav{ padding: 14px var(--page-pad); }
+  .site-nav__mark{ font-size: 16px; }
+  .site-nav__links{ gap: 15px; font-size: 12px; }
+}
+
+/* the map renders small on phones — scale its lettering up so the
+   two village names stay legible at ~0.4x */
+@media (max-width: 760px){
+  .map-pin-label{ font-size: 30px; }
+  .map-pin-sub{ font-size: 21px; letter-spacing: .06em; }
+  .map-mystery-label{ font-size: 25px; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .scene-wrap *{ animation: none !important; }
+  .wa::after{ animation: none !important; }
+}
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="site-nav__mark">רגעים של הגולן</div>
+  <div class="site-nav__links">
+    <a href="index.html">בית</a>
+    <a href="bicycle.html">אופניים</a>
+    <a href="about.html">מי אנחנו</a>
+    <a href="https://www.instagram.com/golanmoments/" target="_blank" rel="noopener">אינסטגרם</a>
+  </div>
+</nav>
+
+<!-- ============================================================
+     1 · HERO — one unforgettable moment
+     The hero loop. `poster` is the frame shown until enough video has
+     buffered, so it must point at a file that exists — otherwise the
+     hero is blank on first paint.
+     ============================================================ -->
+<header class="bike-hero hero"><!-- `hero` kept so js/main.js finds it for the nav-solid threshold -->
+  <div class="bike-hero__media">
+    <video class="bike-hero__vid"
+           src="video/hero-loop-web.mp4"
+           poster="img/trails/4.jpg"
+           autoplay muted loop playsinline preload="auto"
+           aria-label="לופ וידאו: רכיבה בשביל בשעת אור זהוב"></video>
+  </div>
+  <div class="bike-hero__content">
+    <h1 class="bike-hero__title">יש גבעה אחת שממנה רואים הכול.</h1>
+    <p class="bike-hero__sub">היא לא מסומנת באפליקציה. היא כן מסומנת אצלנו.</p>
+  </div>
+</header>
+
+<!-- ============================================================
+     INTRO
+     ============================================================ -->
+<section class="intro reveal">
+  <p class="lede">ארבע עונות, ארבע דרכים לרכוב בגולן</p>
+  <p>הגולן משתנה עם העונות — ובכל עונה הוא מספר סיפור אחר על שני גלגלים. בקיץ מחפשים את השעות הקרירות, בסתיו את האור הרך, בחורף את המים והבוץ, ובאביב את הפריחה.</p>
+  <p class="fine">כאן תמצאו ארבעה רגעים שונים של רכיבה. בוא להתארח ונראה לכם את המסלולים בהתאם לעונה.</p>
+</section>
+
+<!-- ============================================================
+     2 · TRAIL CARDS
+     ============================================================ -->
+<section class="trails">
+  <div class="section-head reveal">
+    <span class="eyebrow">ארבע עונות, ארבע רכיבות</span>
+    <h2>ארבע עונות של רכיבה</h2>
+    <p class="sub">לא רשימת מסלולים — ארבעה סיפורים של הגולן לאורך השנה. לחצו על כרטיס כדי להיכנס לסיפור.</p>
+  </div>
+  <div class="trails__grid" id="trailsGrid"><!-- built by script from TRAILS --></div>
+</section>
+
+<!-- ============================================================
+     4 · OWNER
+     TODO-OWNER-PHOTO: replace .scene-wrap with a real portrait
+     <img src="img/owner.jpg" alt="...">
+     TODO-OWNER: name and quote below are placeholder text.
+     ============================================================ -->
+<section class="owner reveal">
+  <div class="owner__portrait">
+    <img src="img/local.jpg" alt="...">
+  </div>
+  <div class="owner__copy">
+    <span class="eyebrow">רוכבים מקומיים</span>
+    <p class="owner__quote">״״כל עונה בגולן מרגישה אחרת על האופניים. תגידו לי מתי אתם מגיעים — ואני אגיד לכם איזה יום רכיבה מחכה לכם.״״</p>
+    
+    <p class="owner__body">אנחנו מכירים את האזור, את השבילים ואת השינויים של העונות — ונשמח לעזור לכם לתכנן יום רכיבה שמתאים לזמן שבו הגעתם לגולן</p>
+    <a class="owner__cta" href="https://wa.me/972547645449" target="_blank" rel="noopener">
+      דברו איתי בוואטסאפ
+      <span aria-hidden="true">←</span>
+    </a>
+  </div>
+</section>
+
+<!-- ============================================================
+     5 · GALLERY
+     TODO-GALLERY: swap GALLERY array in the script for real
+     photos: { src, alt, cap }
+     ============================================================ -->
+<section class="gal">
+  <div class="section-head reveal">
+    <span class="eyebrow">אלבום</span>
+    <h2>מה שרואים מהאוכף</h2>
+    <p class="sub">רגעים מארבע עונות של רכיבה. לחצו להגדלה.</p>
+  </div>
+  <div class="gal__grid" id="galGrid"><!-- built by script --></div>
+</section>
+
+<!-- ============================================================
+     FINAL INVITE
+     ============================================================ -->
+<section class="invite">
+  <img src="img/trails/12.jpg" alt="אופניים בדשא מעל עמק רחב בשעת אחר צהריים" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" loading="lazy">
+  <div class="invite__content reveal" style="position:relative;z-index:2">
+    <h2>בכל עונה הגולן מחכה מחדש</h2>
+    <p>כתבו לנו מתי אתם מגיעים ומה אתם מחפשים — בוקר קיצי, אור סתיו, שבילים רטובים או פריחה — ונתאים לכם יום רכיבה.</p>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="site-footer__top">
+    <div class="site-footer__mark">
+      רגעים של הגולן
+      <span>מטיילים, נושמים, מתאהבים</span>
+    </div>
+    <div class="site-footer__links">
+      <a href="index.html">בית</a>
+      <a href="about.html">מי אנחנו</a>
+      <a href="https://wa.me/972547645449" target="_blank" rel="noopener">וואטסאפ</a>
+    </div>
+  </div>
+  <p class="site-footer__note">האתר נועד להשראה בלבד ואינו מדריך ניווט. השבילים בגולן משתנים לפי עונה, מזג אוויר ואילוצי שטח — לפני יציאה התייעצו עם המארחים ובדקו מצב שטח והנחיות בטיחות.</p>
+  <p class="site-footer__copy">© רגעים של הגולן</p>
+</footer>
+
+<!-- fixed WhatsApp -->
+<a class="wa" href="https://wa.me/972547645449" target="_blank" rel="noopener" aria-label="שליחת הודעה בוואטסאפ">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.95 1.17-.17.2-.35.22-.65.07-.3-.15-1.13-.42-2.15-1.33-.8-.71-1.33-1.59-1.48-1.89-.15-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.18.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.68-1.62-.93-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.03 1-1.03 2.44 0 1.44 1.05 2.83 1.2 3.03.15.2 2.06 3.28 5.05 4.47.71.31 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2.01-1.42.25-.7.25-1.29.17-1.42-.07-.12-.27-.2-.57-.35Z"/><path d="M12.04 2C6.6 2 2.18 6.4 2.18 11.82c0 1.73.45 3.42 1.31 4.9L2 22l5.42-1.42a9.9 9.9 0 0 0 4.62 1.18h.01c5.43 0 9.85-4.4 9.85-9.82C21.9 6.4 17.47 2 12.04 2Zm0 17.96h-.01a8.2 8.2 0 0 1-4.16-1.14l-.3-.18-3.1.81.83-3.02-.19-.31a8.14 8.14 0 0 1-1.25-4.3c0-4.5 3.68-8.16 8.19-8.16 2.19 0 4.24.85 5.79 2.39a8.1 8.1 0 0 1 2.4 5.78c0 4.5-3.68 8.16-8.2 8.16Z"/></svg>
+  <span class="wa__txt">איפה כדאי לרכוב עכשיו?</span>
+</a>
+
+<!-- trail story overlay -->
+<div class="story" id="story" role="dialog" aria-modal="true" aria-labelledby="storyTitle" tabindex="-1">
+  <button class="x-close" id="storyClose" type="button" aria-label="סגירה">✕</button>
+  <div id="storyInner"></div>
+</div>
+
+<!-- lightbox -->
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="תמונה מוגדלת">
+  <button class="x-close" id="lbClose" type="button" aria-label="סגירה">✕</button>
+  <div class="lb__stage">
+    <div class="lb__media" id="lbMedia"></div>
+    <div class="lb__cap"><span id="lbCap"></span><span id="lbCount" dir="ltr"></span></div>
+    <button class="lb__nav lb__nav--prev" id="lbPrev" type="button" aria-label="הקודם">›</button>
+    <button class="lb__nav lb__nav--next" id="lbNext" type="button" aria-label="הבא">‹</button>
+  </div>
+</div>
+
+<script src="js/main.js"></script>
+<script>
+/* ============================================================
+   bicycle.html — prototype logic
+   ------------------------------------------------------------
+   Sections:
+     A. Content config  (TRAILS, GALLERY)  ← edit here
+     B. Placeholder art generator          ← delete when real
+     C. Card + gallery rendering
+     D. Story overlay
+     E. Lightbox
+     F. Map animation trigger
+     G. Reveal-on-scroll fallback
+   ============================================================ */
+(function(){
+"use strict";
+
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const WA = "https://wa.me/972547645449";
+
+/* ============================================================
+   A · CONTENT CONFIG
+   ------------------------------------------------------------
+   photos: [{ src, alt, cap }, …]      4–6 per trail
+   card / hero: { src, alt }
+   clip: { src, poster, note }   — `src` optional; without it the
+         clip renders as a still slot with a "coming soon" badge.
+   ============================================================ */
+const IMG = 'img/trails/';
+
+const TRAILS = [
+  {
+    mood: "קיץ בגולן",
+    area: "דרום הגולן",
+    season: "קיץ",
+    effort: "קל–בינוני",
+    lead: "יוצאים מוקדם, כשהגולן עוד קריר",
+    palette: "dawn",
+    card: {src: IMG+"tayeletdrom14.jpg", alt: "רוכב בירידה מפותלת עם נוף פתוח"},
+    hero: {src: IMG+"klali48.jpg", alt: "שני רוכבים על כביש שקט בשעת בוקר"},
+    /*clip: {poster: IMG+"2.jpg", note: "22 שניות · הירידה המפותלת"},*/
+	clip: { src: "video/20260814-web.mp4", poster: "img/trails/klali48.jpg", note: "בוקר קיצי בגולן" },
+    texture: [
+      "בקיץ יוצאים מוקדם. האספלט עוד קר, האוויר צלול, והגולן מתעורר לאט. כמה שעות אחר כך כבר מרגישים היטב את השמש.",
+      "יש נקודה אחת שבה הכביש מתיישר ופתאום כל הנוף נפתח לפניך. הערפל מתפזר לשניה ותל עצום נראה באופק.",
+      "האם נעלה עליו ונצפה על העננים מלמעלה? או שנפנה למאגר ונהנה מהתשקפות המים בזריחה? לא  משנה הסדר."
+    ],
+    photos: [
+      {src: IMG+"tayeletdrom14.jpg", alt: "", cap: "בוקר קיצי"},
+      {src: IMG+"klali47.jpg", alt: "", cap: "נחל גמלא"},
+      {src: IMG+"fares9.jpg", alt: "", cap: "נוף כמו מהמטוס"},
+      {src: IMG+"fares10.jpg", alt: "", cap: "נוף כמו מהמטוס"},
+      {src: IMG+"mifgashhanahalim25.jpg", alt: "", cap: "מפגש הנחלים"},
+      {src: IMG+"klali51.jpg", alt: "", cap: "צפון הגולן"},
+      {src: IMG+"mifgashhanahalim31.jpg", alt: "", cap: "מפגש הנחלים"},
+	  {src: IMG+"klali48.jpg", alt: "", cap: "הנוף נפתח"},
+	  {src: IMG+"klali21.jpg", alt: "", cap: "בוקר קיצי"},
+	  {src: IMG+"klali50.jpg", alt: "", cap: "מאגר בני צפת"},
+	  {src: IMG+"fares8.jpg", alt: "", cap: "ערפל כבד על הבוקר"},
+	  {src: IMG+"katzr9.jpg", alt: "", cap: "שקיעה במצוק"},
+    ]
+  },
+  {
+    mood: "סתיו בגולן",
+    area: "דרום הגולן",
+    season: "סתיו",
+    effort: "בינוני",
+    lead: "יוצאים כשהאוויר מתחיל להתקרר",
+    palette: "dusk",
+    card: {src: IMG+"klali33.jpg", alt: "שני רוכבים בדרך עפר בין שדות של סתיו"},
+    hero: {src: IMG+"4.jpg",  alt: "רוכב בשביל צר בשעת אחר צהריים זהובה"},
+    clip: {poster: IMG+"4.jpg", note: "20 שניות · אור סתיו על הרכס"},
+    texture: [
+      "בסתיו הגולן מחליף קצב. החום נרגע, השדות מתחילים להזהיב, והאור של אחר הצהריים נעשה רך יותר בכל יום.",
+      "יש רכס אחד שבו האור של הסתיו נופל בדיוק על השדות. זו אחת הנקודות שהכי כיף להגיע אליהן בזמן הנכון.",
+      "רוכבים עד האור האחרון וחוזרים בקצב רגוע. הימים מתקצרים, והערב בגולן מגיע מהר."
+    ],
+    photos: [
+      {src: IMG+"bneiyehuda1.jpg", alt: "", cap: "טיילת דרום הגולן"},
+      {src: IMG+"hatzavim3.jpg", alt: "", cap: "טיילת דרום הגולן"},
+      {src: IMG+"hazeka1.jpg", alt: "", cap: "חלמוניות בתל חזקה"},
+      {src: IMG+"kramim1.jpg", alt: "", cap: "כרמים בסתיו"},
+	  {src: IMG+"klali33.jpg", alt: "", cap: "כרמים בסתיו"},
+      {src: IMG+"kramim2.jpg", alt: "", cap: "כרמים בסתיו"},
+      {src: IMG+"tayeletmavohama39.jpg", alt: "", cap: "טיילת מבוא חמה"},
+	  {src: IMG+"yaarodem11.jpg", alt: "", cap: "יער אודם"},
+    ]
+  },
+  {
+    mood: "חורף בגולן — מים, בוץ וחוויה",
+    area: "מרכז ודרום הגולן",
+    season: "חורף",
+    effort: "בינוני",
+    lead: "יוצאים אחרי הגשם, כשהגולן מתמלא מים",
+    palette: "oak",
+    card: {src: IMG+"9.jpg",  alt: "מבט מהכידון על שביל בוץ אחרי הגשם"},
+    hero: {src: IMG+"hermon14.jpg", alt: ""},
+    clip: {poster: IMG+"13.jpg", note: "26 שניות · רכיבה וחציית נחל"},
+    texture: [
+      "אחרי גשם טוב הגולן משתנה לגמרי: שלוליות בשביל, נחלים זורמים, אדמה כהה ואוויר נקי. זו רכיבה שמרגישים בכל מטר.",
+      "אפשר להגיע רטובים — זה חלק מהחוויה. ואם הקרקע רטובה מדי, יש גם אפשרות לבחור רכיבה יבשה יותר באותו אזור.",
+      "החורף משנה את השבילים במהירות. לכן המסלול הנכון נקבע לפי הגשם ומצב הקרקע באותו יום — שווה לשאול אותנו לפני שיוצאים."
+    ],
+    photos: [
+      {src: IMG+"9.jpg", alt: "", cap: "מים כל הדרך"},
+      {src: IMG+"emekabaha1.jpg", alt: "", cap: "אתר מורשת קרב"},
+      {src: IMG+"irusim2.jpg", alt: "", cap: "מפל חזק מאוד"},
+      {src: IMG+"klali11.jpg", alt: "", cap: "נוף גולני"},
+      {src: IMG+"mapaleliad3.jpg", alt: "", cap: "רגע נדיר"},
+      {src: IMG+"zrimot55.jpg", alt: "", cap: "נחל שיוצא ממאגר"},
+      {src: IMG+"12.jpg", alt: "", cap: "אחרי עליה קשה"},
+      {src: IMG+"zrimot19.jpg", alt: "", cap: "מפל מיוחד ונסתר"},
+      {src: IMG+"3.jpg", alt: "", cap: "חציית ערוץ זורם"},
+      {src: IMG+"tzirhaneft5.jpg", alt: "", cap: "רואים רחוק"},
+      {src: IMG+"yaarodem3.jpg", alt: "", cap: "פרות ביער"},
+    ]
+  },
+  {
+    mood: "אביב בגולן — שביל בין פרחי הבר",
+    area: "מרכז הגולן",
+    season: "אביב",
+    effort: "קל",
+    lead: "העונה הכי צבעונית בשנה",
+    palette: "bloom",
+    card: {src: IMG+"7.jpg", alt: "אופניים ליד שדה פרחי בר באביב"},
+    hero: {src: IMG+"7.jpg", alt: "אופניים ליד שדה פרחי בר באביב"},
+    clip: {poster: IMG+"8.jpg", note: "18 שניות · רכיבה בין פרחי האביב"},
+    texture: [
+      "באביב הגולן מתכסה בצבעים. הפריחה היא עניין של תזמון — אותו שביל יכול להיראות אחרת לגמרי משבוע לשבוע.",
+      "רוכבים כאן לאט. עוצרים לצילום, מסתכלים על הפריחה, ממשיכים עוד קצת — ושוב עוצרים. זה חלק מהמסלול.",
+      "יש בדרך מעיין קטן שהמקומיים אוהבים לעצור בו. מי שלא מכיר אותו יכול פשוט לחלוף לידו."
+    ],
+    photos: [
+      {src: IMG+"8.jpg", alt: "", cap: ""},
+      {src: IMG+"6.jpg", alt: "", cap: ""},
+      {src: IMG+"11.jpg", alt: "", cap: ""},
+      {src: IMG+"hamatgader2.jpg", alt: "", cap: ""},
+      {src: IMG+"hamatgader20.jpg", alt: "", cap: ""},
+      {src: IMG+"hamatgader7.jpg", alt: "", cap: ""},
+      {src: IMG+"hispin9.jpg", alt: "", cap: ""},
+      {src: IMG+"klali38.jpg", alt: "", cap: ""},
+      {src: IMG+"mapalayit1.jpg", alt: "", cap: ""},
+      {src: IMG+"priha52.jpg", alt: "", cap: ""},
+      {src: IMG+"tzirhamaim13.jpg", alt: "", cap: ""},
+      {src: IMG+"yehudiya16.jpg", alt: "", cap: ""},
+      {src: IMG+"yaarodem7.jpg", alt: "", cap: ""},
+      {src: IMG+"zrimot31.jpg", alt: "", cap: ""},
+      {src: IMG+"zrimot26.jpg", alt: "", cap: ""},
+      {src: IMG+"einotfahem23.jpg", alt: "", cap: ""},
+    ]
+  },  
+];
+
+const GALLERY = [
+  {src: IMG+"klali48.jpg",  alt: "", cap: "קיץ · בוקר"},
+  {src: IMG+"7.jpg",  alt: "", cap: "אביב · פריחה"},
+  {src: IMG+"2.jpg",  alt: "", cap: "קיץ · ירידה"},
+  {src: IMG+"13.jpg", alt: "", cap: "חורף · חצייה"},
+  {src: IMG+"4.jpg",  alt: "", cap: "סתיו · אור אחרון"},
+  {src: IMG+"8.jpg",  alt: "", cap: "אביב · אירוס הגולן"},
+  {src: IMG+"5.jpg",  alt: "", cap: "סתיו · דרך פתוחה"},
+  {src: IMG+"11.jpg", alt: "", cap: "חורף · השתקפות"},
+  {src: IMG+"6.jpg",  alt: "", cap: "אביב · המעיין"},
+  {src: IMG+"bneiyehuda1.jpg", alt: "", cap: "סתיו · שלכת"},
+  {src: IMG+"9.jpg",  alt: "", cap: "חורף · בוץ"},
+  {src: IMG+"12.jpg", alt: "", cap: "סתיו · רוח"},
+  {src: IMG+"3.jpg",  alt: "", cap: "חורף · בריכה"},
+  {src: IMG+"14.jpg", alt: "", cap: "קיץ · עשב"},
+  {src: IMG+"10.jpg", alt: "", cap: "קיץ · צל"},
+  {src: IMG+"klali51.jpg", alt: "", cap: "קיץ · צפון הגולן"},
+  {src: IMG+"yaarodem7.jpg", alt: "", cap: "אביב · יער"},
+  {src: IMG+"tzirhaneft5.jpg", alt: "", cap: "חורף · דרך"},
+  {src: IMG+"tzirhamaim13.jpg", alt: "", cap: "אביב · מים"},
+  {src: IMG+"zrimot26.jpg", alt: "", cap: "אביב · זרימות"},
+  {src: IMG+"derehpatrolim5.jpg", alt: "", cap: "חורף · דרך"},
+];
+
+/* ============================================================
+   B · PLACEHOLDER ART GENERATOR  (delete with the placeholders)
+   Deterministic low-poly landscape, seeded so it never reshuffles.
+   ============================================================ */
+const PALETTES = {
+  dawn:   {sky:["#2B2C3A","#6B5568","#C08A6E"], ridges:["#3A3B44","#4B4A48","#5E5A4C"], sun:"#F0C08A", flow:null},
+  bloom:  {sky:["#8FB2C9","#C8D6C4","#E9E3C7"], ridges:["#5F7148","#758551","#93A162"], sun:"#FFF4CE", flow:"#E8D26A"},
+  dust:   {sky:["#B99A6E","#D8BC8C","#EEDCB4"], ridges:["#7A6242","#95784F","#B0925F"], sun:"#FFE7B0", flow:null},
+  dusk:   {sky:["#3D3350","#8A5560","#D08A5E"], ridges:["#2F3038","#43414A","#5A5350"], sun:"#FFC98A", flow:null},
+  oak:    {sky:["#7FA0A8","#B9C9B4","#DCE2C6"], ridges:["#3E5136","#4E6242","#647353"], sun:"#EFF3D2", flow:null},
+  basalt: {sky:["#4C5257","#7A8085","#A8ABA6"], ridges:["#2B2C29","#3B3D38","#51544C"], sun:"#D6D2C4", flow:null},
+  hero:   {sky:["#2E3B45","#7E6E62","#D9A874"], ridges:["#33362F","#454A3A","#5E654C"], sun:"#FFD79A", flow:"#D9C070"},
+  portrait:{sky:["#5C5347","#8B7B63","#C4AE8C"], ridges:["#4A4136","#5E5342","#786A52"], sun:"#EBD6AE", flow:null}
+};
+
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+/* Build a low-poly landscape SVG. rider=true adds a cyclist silhouette. */
+function polyArt(paletteName, seed, opts){
+  opts = opts || {};
+  const P = PALETTES[paletteName] || PALETTES.oak;
+  const rnd = mulberry32(seed * 2654435761 % 2147483647);
+  /* Wide scenes are rendered into very letterboxed boxes and get
+     centre-cropped, so their horizon + track sit higher up the
+     viewBox — otherwise the rider lands outside the visible band. */
+  const W = 1000, H = opts.tall ? 1250 : (opts.wide ? 560 : 800);
+  const id = "p" + paletteName + seed + (opts.tall?"t":"") + (opts.wide?"w":"");
+  let s = '';
+
+  s += `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">`;
+  s += `<defs>
+    <linearGradient id="sky${id}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${P.sky[0]}"/><stop offset=".55" stop-color="${P.sky[1]}"/><stop offset="1" stop-color="${P.sky[2]}"/>
+    </linearGradient>
+    <radialGradient id="glow${id}" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="${P.sun}" stop-opacity=".95"/>
+      <stop offset="1" stop-color="${P.sun}" stop-opacity="0"/>
+    </radialGradient>
+  </defs>`;
+  s += `<rect width="${W}" height="${H}" fill="url(#sky${id})"/>`;
+
+  // sun / light source
+  const sx = 140 + rnd() * 720, sy = H * (0.12 + rnd() * 0.18);
+  const sr = H * (0.18 + rnd() * 0.16);
+  s += `<g class="sun"><circle cx="${sx.toFixed(0)}" cy="${sy.toFixed(0)}" r="${sr.toFixed(0)}" fill="url(#glow${id})"/>`;
+  s += `<circle cx="${sx.toFixed(0)}" cy="${sy.toFixed(0)}" r="${(H*(0.022+rnd()*0.02)).toFixed(0)}" fill="${P.sun}" opacity=".9"/></g>`;
+
+  // ridge layers, back → front. Horizon jitters per seed so two
+  // placeholders from the same palette don't look like the same shot.
+  const layers = 3;
+  const hzBase = opts.tall ? 0.52 : (opts.wide ? 0.40 : 0.46);
+  const horizon = H * (hzBase + (rnd() - 0.5) * 0.16);
+  for (let L = 0; L < layers; L++){
+    const base = horizon + (H - horizon) * (L / layers) * 0.72;
+    const amp  = (H * 0.075) * (1 - L * 0.18);
+    const step = W / (5 + Math.floor(rnd() * 3));
+    let d = `M -80 ${base.toFixed(0)}`;
+    for (let x = -80; x <= W + 160; x += step){
+      const y = base - amp * (0.35 + rnd());
+      d += ` L ${x.toFixed(0)} ${y.toFixed(0)}`;
+    }
+    d += ` L ${W + 160} ${H + 40} L -80 ${H + 40} Z`;
+    s += `<path class="lyr-${L+1}" d="${d}" fill="${P.ridges[L]}" opacity="${(0.72 + L*0.12).toFixed(2)}"/>`;
+  }
+
+  // basalt facets on the front ridge
+  s += `<g opacity=".26" fill="#22221E">`;
+  for (let i = 0; i < 7; i++){
+    const bx = rnd() * W, by = H * (0.72 + rnd() * 0.22), r = 22 + rnd() * 52;
+    s += `<path d="M ${bx.toFixed(0)} ${by.toFixed(0)} l ${r.toFixed(0)} ${(r*0.5).toFixed(0)} l ${(-r*0.85).toFixed(0)} ${(r*0.22).toFixed(0)} Z"/>`;
+  }
+  s += `</g>`;
+
+  // wildflower / dry-grass speckle (present on ~2 of 3 seeds)
+  if (P.flow && rnd() > 0.32){
+    s += `<g fill="${P.flow}" opacity=".7">`;
+    for (let i = 0; i < 90; i++){
+      const fx = rnd() * W, fy = H * (0.68 + rnd() * 0.32), fr = 2 + rnd() * 4.5;
+      s += `<circle cx="${fx.toFixed(0)}" cy="${fy.toFixed(0)}" r="${fr.toFixed(1)}"/>`;
+    }
+    s += `</g>`;
+  }
+
+  // single-track hint: a pale line curving through the front ridge
+  const ty = H * (opts.wide ? 0.70 : 0.86);
+  const bend = (rnd() - 0.5) * H * 0.12;
+  const flip = rnd() > 0.5 ? 1 : -1;
+  s += `<path d="M -40 ${(ty + 50 * flip).toFixed(0)} C ${(W*0.28).toFixed(0)} ${(ty + 18 + bend).toFixed(0)}, ${(W*0.55).toFixed(0)} ${(ty - 34 + bend).toFixed(0)}, ${(W+60).toFixed(0)} ${(ty - 70 * flip).toFixed(0)}"
+        fill="none" stroke="#E8DCC0" stroke-opacity="${(0.2 + rnd()*0.16).toFixed(2)}" stroke-width="${(H*(0.014+rnd()*0.014)).toFixed(0)}" stroke-linecap="round"/>`;
+
+  // rider silhouette + dust
+  if (opts.rider){
+    const rx = opts.riderX != null ? opts.riderX : W * 0.62;
+    const ry = ty - 22;
+    const sc = opts.riderScale || (H / 800) * 1.5;
+    /* soft backlight so the silhouette reads on dark palettes too */
+    s += `<ellipse cx="${rx.toFixed(0)}" cy="${(ry - 14 * sc).toFixed(0)}" rx="${(90 * sc).toFixed(0)}" ry="${(58 * sc).toFixed(0)}" fill="url(#glow${id})" opacity=".32"/>`;
+    /* NOTE: the positioning transform must live on the OUTER <g>. A CSS
+       `transform` (the bob animation) REPLACES an SVG transform attribute
+       rather than composing with it, so the animated class needs its own
+       inner group or the rider snaps to the origin. */
+    s += `<g transform="translate(${rx.toFixed(0)},${ry.toFixed(0)}) scale(${sc.toFixed(2)})"><g class="rider">
+      <g fill="none" stroke="#1B1A16" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="-19" cy="0" r="12"/><circle cx="19" cy="0" r="12"/>
+        <path d="M-19 0 L-2 -14 L14 -14 L19 0 M-2 -14 L4 0 M4 0 L-19 0 M14 -14 L16 -22"/>
+        <path d="M4 -2 L1 -18 L9 -30 L16 -22"/>
+        <path d="M9 -30 L-1 -26 M9 -30 L3 -40"/>
+      </g>
+      <circle cx="1" cy="-44" r="5.6" fill="#1B1A16"/>
+    </g></g>`;
+    s += `<g fill="#E4D2AE">`;
+    for (let i = 0; i < 4; i++){
+      s += `<circle class="dust" cx="${(rx + 26 + i*7).toFixed(0)}" cy="${(ry + 2).toFixed(0)}" r="${(7 + i*2)}" opacity=".5"/>`;
+    }
+    s += `</g>`;
+  }
+
+  s += `</svg>`;
+  return s;
+}
+
+/* Build a "video slot" element: animated placeholder scene + badge */
+function sceneEl(paletteName, seed, opts, badge){
+  const wrap = document.createElement('div');
+  wrap.className = 'scene-wrap';
+  if (!REDUCED) wrap.setAttribute('data-live','');
+  wrap.style.width = '100%';
+  wrap.style.height = '100%';
+  wrap.innerHTML = polyArt(paletteName, seed, opts) + '<div class="grain" aria-hidden="true"></div>';
+  if (badge){
+    const b = document.createElement('span');
+    b.className = 'ph-badge';
+    b.textContent = badge;
+    wrap.appendChild(b);
+  }
+  return wrap;
+}
+
+/* the hero loop is decorative — hold it on its poster frame when the
+   viewer has asked for less motion */
+if (REDUCED){
+  const hv = document.querySelector('.bike-hero__vid');
+  if (hv){ hv.removeAttribute('autoplay'); hv.pause(); }
+}
+
+/* Fill declarative data-scene hosts (owner portrait) */
+document.querySelectorAll('[data-scene]').forEach(function(host, i){
+  const kind = host.getAttribute('data-scene');
+  const cfg = {
+    portrait: ['portrait', 23, {tall:true}]
+  }[kind] || ['oak', i, {}];
+  host.innerHTML = polyArt(cfg[0], cfg[1], cfg[2]) + '<div class="grain" aria-hidden="true"></div>';
+
+});
+
+/* media renderer that accepts BOTH placeholder specs and real assets */
+function mediaHTML(item, seed, opts){
+  if (item && item.src){
+    if (/\.(mp4|webm|mov)$/i.test(item.src)){
+      return '<video src="'+item.src+'"'+(item.poster?' poster="'+item.poster+'"':'')+' autoplay muted loop playsinline></video>';
+    }
+    return '<img src="'+item.src+'" alt="'+(item.alt||'')+'">';
+  }
+  const pal = (item && item.palette) || opts.palette || 'oak';
+  return polyArt(pal, seed, opts) + '<div class="grain" aria-hidden="true"></div>';
+}
+
+/* ============================================================
+   C · RENDER TRAIL CARDS + GALLERY
+   ============================================================ */
+const grid = document.getElementById('trailsGrid');
+TRAILS.forEach(function(t, i){
+  const btn = document.createElement('button');
+  btn.className = 'tcard reveal';
+  btn.type = 'button';
+  btn.setAttribute('data-trail', i);
+  btn.setAttribute('aria-label', 'פתיחת הסיפור: ' + t.mood);
+  btn.innerHTML =
+    '<span class="tcard__media">' +
+      '<img src="' + t.card.src + '" alt="' + t.card.alt + '" loading="lazy" decoding="async">' +
+      '<span class="tcard__meta">' +
+        '<span class="tcard__mood">' + t.mood + '</span>' +
+        '<span class="tcard__tags">' +
+          '<span class="tcard__tag">' + t.area + '</span>' +
+          '<span class="tcard__tag tcard__tag--season">' + t.season + '</span>' +
+          '<span class="tcard__tag">' + t.effort + '</span>' +
+        '</span>' +
+      '</span>' +
+    '</span>' +
+    '<span class="tcard__foot">' +
+      '<span>' + t.lead + '</span>' +
+      '<span class="tcard__arrow" aria-hidden="true">←</span>' +
+    '</span>';
+  btn.addEventListener('click', function(){ openStory(i); });
+  grid.appendChild(btn);
+});
+
+const galGrid = document.getElementById('galGrid');
+GALLERY.forEach(function(g, i){
+  const b = document.createElement('button');
+  b.className = 'gtile reveal';
+  b.type = 'button';
+  b.setAttribute('aria-label', 'הגדלה: ' + (g.cap || ''));
+  b.innerHTML = mediaHTML(g, 300 + i * 53, {palette:g.palette});
+  b.addEventListener('click', function(){ openLB(GALLERY, i, 300, 53); });
+  galGrid.appendChild(b);
+});
+
+/* ============================================================
+   D · STORY OVERLAY
+   ============================================================ */
+const story      = document.getElementById('story');
+const storyInner = document.getElementById('storyInner');
+const storyClose = document.getElementById('storyClose');
+let lastFocus = null;
+
+function trailPhotos(t, i){
+  const n = typeof t.photos === 'number' ? t.photos : t.photos.length;
+  const out = [];
+  for (let k = 0; k < n; k++){
+    out.push(typeof t.photos === 'number'
+      ? {palette: t.palette, cap: t.mood + ' · ' + (k + 1)}
+      : t.photos[k]);
+  }
+  return out;
+}
+
+function openStory(i){
+  const t = TRAILS[i];
+  const photos = trailPhotos(t, i);
+  const hasClip = !!(t.clip && t.clip.src);
+  lastFocus = document.activeElement;
+
+  storyInner.innerHTML =
+    '<div class="story__hero">' +
+      '<img class="story__heroimg" src="' + t.hero.src + '" alt="' + t.hero.alt + '">' +
+      '<div class="story__head">' +
+        '<span class="eyebrow" style="color:#E8CF9C">' + t.area + '</span>' +
+        '<h2 id="storyTitle">' + t.mood + '</h2>' +
+        '<div class="tcard__tags">' +
+          '<span class="tcard__tag tcard__tag--season">' + t.season + '</span>' +
+          '<span class="tcard__tag">' + t.effort + '</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="story__body"><div class="story__texture">' +
+      t.texture.map(function(p){ return '<p>' + p + '</p>'; }).join('') +
+    '</div></div>' +
+
+    /* the 15–30s clip */
+    '<figure class="story__clip">' +
+      '<div class="clipframe">' +
+        /* A clip with `src` renders as a muted looping video; one with
+           only `poster` stays a badged still slot. */
+        (hasClip
+          ? '<video class="clipvid" src="' + t.clip.src + '" poster="' + t.clip.poster + '"' +
+              ' muted loop playsinline preload="metadata"' +
+              ' aria-label="' + t.clip.note + '"></video>' +
+            '<button class="clipsound" type="button" data-sound aria-pressed="false">הפעל קול</button>' +
+            '<button class="clipplay" type="button" data-play hidden aria-label="הפעלת הקליפ">▶</button>'
+          : '<img class="clipposter" src="' + t.clip.poster + '" alt="' + t.mood + '" loading="lazy" decoding="async">' +
+            '<span class="ph-badge">עדיין תמונה · כאן ייכנס קליפ 15–30 שניות</span>'
+        ) +
+      '</div>' +
+      '<figcaption class="plate-label">' + t.clip.note + '</figcaption>' +
+    '</figure>' +
+
+    /* 4–6 photos */
+    '<div class="story__strip" id="strip' + i + '">' +
+      photos.map(function(p, k){
+        return '<button class="sframe" type="button" data-k="' + k + '" aria-label="הגדלה">' +
+          mediaHTML(p, 500 + i * 40 + k * 137, {palette:t.palette, tall:true}) + '</button>';
+      }).join('') +
+    '</div>' +
+
+    /* the locked reveal — the whole point of the page */
+    '<div class="story__locked"><div class="locked">' +
+      '<div class="locked__txt">' +
+        '<h3>ואיפה זה בדיוק?</h3>' +
+        '<p>את הפנייה, את נקודת ההתחלה ואת השעה הנכונה לעונה הזאת — נשמח להסביר לכם כשתבואו להתארח אצלינו.</p>' +
+      '</div>' +
+      '<a class="locked__cta" href="' + WA + '" target="_blank" rel="noopener">שאלו על המסלול שמתאים לעונה <span aria-hidden="true">←</span></a>' +
+    '</div></div>' +
+    '<div class="story__end"></div>';
+
+  /* the clip: autoplay muted, with a sound toggle and a manual
+     fallback if the browser blocks playback */
+  const vid = storyInner.querySelector('.clipvid');
+  if (vid){
+    const playBtn = storyInner.querySelector('[data-play]');
+    const sndBtn  = storyInner.querySelector('[data-sound]');
+    vid.muted = true;                       /* required for autoplay */
+    const tryPlay = function(){
+      const pr = vid.play();
+      if (pr && pr.then){
+        pr.then(function(){ if (playBtn) playBtn.hidden = true; })
+          .catch(function(){ if (playBtn) playBtn.hidden = false; });
+      }
+    };
+    if (REDUCED){ if (playBtn) playBtn.hidden = false; } else { tryPlay(); }
+    if (playBtn) playBtn.addEventListener('click', tryPlay);
+    if (sndBtn) sndBtn.addEventListener('click', function(){
+      vid.muted = !vid.muted;
+      sndBtn.textContent = vid.muted ? 'הפעל קול' : 'השתק';
+      sndBtn.setAttribute('aria-pressed', String(!vid.muted));
+      if (!vid.muted) tryPlay();
+    });
+  }
+
+  storyInner.querySelectorAll('.sframe').forEach(function(el){
+    el.addEventListener('click', function(){
+      openLB(photos.map(function(p, k){
+        return Object.assign({}, p, {palette: p.palette || t.palette, cap: p.cap || (t.mood + ' · ' + (k + 1))});
+      }), +el.getAttribute('data-k'), 500 + i * 40, 137);
+    });
+  });
+
+  story.classList.add('is-open');
+  document.body.classList.add('is-locked');
+  story.scrollTop = 0;
+  storyClose.focus();
+}
+
+function closeStory(){
+  story.classList.remove('is-open');
+  storyInner.innerHTML = '';
+  if (!lb.classList.contains('is-open')) document.body.classList.remove('is-locked');
+  if (lastFocus) lastFocus.focus();
+}
+storyClose.addEventListener('click', closeStory);
+
+/* ============================================================
+   E · LIGHTBOX
+   ============================================================ */
+const lb      = document.getElementById('lb');
+const lbMedia = document.getElementById('lbMedia');
+const lbCap   = document.getElementById('lbCap');
+const lbCount = document.getElementById('lbCount');
+let lbSet = [], lbIdx = 0, lbSeed = 0, lbStride = 11;
+
+function paintLB(){
+  const it = lbSet[lbIdx] || {};
+  lbMedia.innerHTML = mediaHTML(it, lbSeed + lbIdx * lbStride, {palette: it.palette, wide:true});
+  lbCap.textContent = it.cap || it.alt || '';
+  lbCount.textContent = (lbIdx + 1) + ' / ' + lbSet.length;
+}
+function openLB(set, idx, seed, stride){
+  lbSet = set; lbIdx = idx; lbSeed = seed || 300; lbStride = stride || 11;
+  paintLB();
+  lb.classList.add('is-open');
+  document.body.classList.add('is-locked');
+  document.getElementById('lbNext').focus();
+}
+function closeLB(){
+  lb.classList.remove('is-open');
+  lbMedia.innerHTML = '';
+  if (!story.classList.contains('is-open')) document.body.classList.remove('is-locked');
+}
+function stepLB(d){ lbIdx = (lbIdx + d + lbSet.length) % lbSet.length; paintLB(); }
+
+document.getElementById('lbClose').addEventListener('click', closeLB);
+document.getElementById('lbPrev').addEventListener('click', function(){ stepLB(-1); });
+document.getElementById('lbNext').addEventListener('click', function(){ stepLB(1); });
+lb.addEventListener('click', function(e){ if (e.target === lb || e.target.classList.contains('lb__stage')) closeLB(); });
+
+document.addEventListener('keydown', function(e){
+  if (lb.classList.contains('is-open')){
+    if (e.key === 'Escape') closeLB();
+    /* RTL: ArrowRight = previous */
+    else if (e.key === 'ArrowRight') stepLB(-1);
+    else if (e.key === 'ArrowLeft')  stepLB(1);
+    return;
+  }
+  if (story.classList.contains('is-open') && e.key === 'Escape') closeStory();
+});
+
+/* ============================================================
+   F · MAP ANIMATION
+   ============================================================ */
+const mapFrame = document.getElementById('mapFrame');
+const dotMotion = document.getElementById('dotMotion');
+
+function runMap(){
+  mapFrame.classList.remove('is-drawing');
+  void mapFrame.offsetWidth;               /* restart CSS animations */
+  mapFrame.classList.add('is-drawing');
+  if (dotMotion && dotMotion.beginElement){
+    try { dotMotion.beginElement(); } catch(_){}
+  }
+}
+
+if (REDUCED){
+  /* show the finished state, no motion */
+  const rs = document.getElementById('revealStroke');
+  if (rs) rs.setAttribute('stroke-dashoffset','0');
+  document.getElementById('mapDot').style.opacity = '1';
+} else if ('IntersectionObserver' in window){
+  const mo = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){ if (en.isIntersecting){ runMap(); mo.unobserve(en.target); } });
+  }, {threshold: 0.4});
+  mo.observe(mapFrame);
+} else {
+  runMap();
+}
+document.getElementById('mapReplay').addEventListener('click', runMap);
+
+/* ============================================================
+   G · REVEAL-ON-SCROLL
+   js/main.js already does this for elements present at load;
+   cards are injected later, so re-run for anything still hidden.
+   ============================================================ */
+(function(){
+  const pending = document.querySelectorAll('.reveal:not(.is-visible)');
+  if (!('IntersectionObserver' in window)){
+    pending.forEach(function(el){ el.classList.add('is-visible'); });
+    return;
+  }
+  const ro = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if (en.isIntersecting){ en.target.classList.add('is-visible'); ro.unobserve(en.target); }
+    });
+  }, {threshold: 0.12, rootMargin: '0px 0px -8% 0px'});
+  pending.forEach(function(el){ ro.observe(el); });
+})();
+
+})();
+</script>
+</body>
+</html>
