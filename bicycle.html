@@ -887,7 +887,7 @@ const TRAILS = [
     palette: "dusk",
     card: {src: IMG+"klali33.jpg", alt: "שני רוכבים בדרך עפר בין שדות של סתיו"},
     hero: {src: IMG+"4.jpg",  alt: "רוכב בשביל צר בשעת אחר צהריים זהובה"},
-    clip: {poster: IMG+"4.jpg", note: "20 שניות · אור סתיו על הרכס"},
+    clip: {poster: IMG+"4.jpg", note: "אור סתיו על הרכס"},
     texture: [
       "בסתיו הגולן מחליף קצב. החום נרגע, השדות מתחילים להזהיב, והאור של אחר הצהריים נעשה רך יותר בכל יום.",
       "יש רכס אחד שבו האור של הסתיו נופל בדיוק על השדות. זו אחת הנקודות שהכי כיף להגיע אליהן בזמן הנכון.",
@@ -913,7 +913,7 @@ const TRAILS = [
     palette: "oak",
     card: {src: IMG+"9.jpg",  alt: "מבט מהכידון על שביל בוץ אחרי הגשם"},
     hero: {src: IMG+"hermon14.jpg", alt: ""},
-    clip: {poster: IMG+"13.jpg", note: "26 שניות · רכיבה וחציית נחל"},
+    clip: {poster: IMG+"13.jpg", note: "רכיבה וחציית נחל"},
     texture: [
       "אחרי גשם טוב הגולן משתנה לגמרי: שלוליות בשביל, נחלים זורמים, אדמה כהה ואוויר נקי. זו רכיבה שמרגישים בכל מטר.",
       "אפשר להגיע רטובים — זה חלק מהחוויה. ואם הקרקע רטובה מדי, יש גם אפשרות לבחור רכיבה יבשה יותר באותו אזור.",
@@ -942,7 +942,7 @@ const TRAILS = [
     palette: "bloom",
     card: {src: IMG+"7.jpg", alt: "אופניים ליד שדה פרחי בר באביב"},
     hero: {src: IMG+"7.jpg", alt: "אופניים ליד שדה פרחי בר באביב"},
-    clip: {poster: IMG+"8.jpg", note: "18 שניות · רכיבה בין פרחי האביב"},
+    clip: {poster: IMG+"8.jpg", note: "רכיבה בין פרחי האביב"},
     texture: [
       "באביב הגולן מתכסה בצבעים. הפריחה היא עניין של תזמון — אותו שביל יכול להיראות אחרת לגמרי משבוע לשבוע.",
       "רוכבים כאן לאט. עוצרים לצילום, מסתכלים על הפריחה, ממשיכים עוד קצת — ושוב עוצרים. זה חלק מהמסלול.",
@@ -1261,8 +1261,7 @@ function openStory(i){
               ' aria-label="' + t.clip.note + '"></video>' +
             '<button class="clipsound" type="button" data-sound aria-pressed="false">הפעל קול</button>' +
             '<button class="clipplay" type="button" data-play hidden aria-label="הפעלת הקליפ">▶</button>'
-          : '<img class="clipposter" src="' + t.clip.poster + '" alt="' + t.mood + '" loading="lazy" decoding="async">' +
-            '<span class="ph-badge">עדיין תמונה · כאן ייכנס קליפ 15–30 שניות</span>'
+          : '<img class="clipposter" src="' + t.clip.poster + '" alt="' + t.mood + '" loading="lazy" decoding="async">'
         ) +
       '</div>' +
       '<figcaption class="plate-label">' + t.clip.note + '</figcaption>' +
